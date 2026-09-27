@@ -47,7 +47,22 @@ def login_user(email, password):
     Authenticate a user using email and password.
     """
 
-    return authenticate(
+    user = authenticate(
         username=email,
         password=password,
     )
+
+    if user is not None:
+        return user
+
+    # Fallback for the custom email-based User model.
+    try:
+        user = User.objects.get(email=email)
+
+        if user.check_password(password) and user.is_active:
+            return user
+
+    except User.DoesNotExist:
+        pass
+
+    return None

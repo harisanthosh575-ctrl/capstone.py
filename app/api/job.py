@@ -16,6 +16,9 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 @authentication_classes([CsrfExemptSessionAuthentication])
 @permission_classes([IsAuthenticated])
 def create_job(request):
+    print("AUTHENTICATED:", request.user.is_authenticated)
+    print("USER:", request.user)
+
     title = request.data.get("title")
     description = request.data.get("description")
     budget = request.data.get("budget")

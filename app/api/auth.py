@@ -86,6 +86,7 @@ def login_view(request):
         )
 
     login(request, user)
+    request.session.save()
 
     return Response(
         {
