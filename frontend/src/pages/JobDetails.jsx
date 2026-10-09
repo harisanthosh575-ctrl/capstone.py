@@ -1,9 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-
-const API_URL = "http://127.0.0.1:8000";
+import api from "../api";
 
 function JobDetails() {
   const { jobId } = useParams();
@@ -25,7 +23,7 @@ function JobDetails() {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(`${API_URL}/api/jobs/`, {
+      const response = await api.get("/api/jobs/", {
         withCredentials: true,
       });
 
@@ -95,8 +93,8 @@ function JobDetails() {
     try {
       setSubmitting(true);
 
-      const response = await axios.post(
-        `${API_URL}/api/jobs/${jobId}/apply/`,
+      const response = await api.post(
+        `/api/jobs/${jobId}/apply/`,
         {
           proposal: proposal.trim(),
         },
@@ -632,4 +630,3 @@ function JobDetails() {
 }
 
 export default JobDetails;
-

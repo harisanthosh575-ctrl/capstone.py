@@ -7,13 +7,8 @@ from rest_framework import status
 from app.models import Job, CreatorProfile
 
 
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request):
-        return
-
-
 @api_view(["POST"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def create_job(request):
     print("AUTHENTICATED:", request.user.is_authenticated)
@@ -83,7 +78,7 @@ def create_job(request):
 
 
 @api_view(["GET"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([AllowAny])
 def list_jobs(request):
     jobs = Job.objects.all().order_by("-id")

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 
 function Jobs() {
 const [jobs, setJobs] = useState([]);
@@ -12,8 +12,8 @@ fetchJobs();
 
 const fetchJobs = async () => {
 try {
-const response = await axios.get(
-"http://127.0.0.1:8000/api/jobs/"
+const response = await api.get(
+"/api/jobs/"
 );
 
 

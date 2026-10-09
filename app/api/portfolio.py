@@ -11,18 +11,12 @@ from rest_framework import status
 from app.models import Portfolio, FreelancerProfile
 
 
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-
-    def enforce_csrf(self, request):
-        return
-
-
 # ============================================================
 # CREATE PORTFOLIO
 # ============================================================
 
 @api_view(["POST"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def create_portfolio(request):
 

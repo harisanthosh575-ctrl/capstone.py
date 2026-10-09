@@ -1,8 +1,6 @@
 
 import { useState } from "react";
-import axios from "axios";
-
-const API_URL = "http://127.0.0.1:8000";
+import api from "../api";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -27,8 +25,8 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/api/login/`,
+      const response = await api.post(
+        "/api/login/",
         formData,
         {
           withCredentials: true,

@@ -1,12 +1,26 @@
 from django.contrib.auth import login, logout
-from rest_framework.decorators import api_view
+from django.middleware.csrf import get_token
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from rest_framework import status
 
 from app.services.auth_service import register_user, login_user
 
 
+class CsrfSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        self.enforce_csrf(request)
+        return super().authenticate(request)
+
+
+@api_view(["GET"])
+def csrf_token(request):
+    return Response({"csrfToken": get_token(request)})
+
+
 @api_view(["POST"])
+@authentication_classes([CsrfSessionAuthentication])
 def signup(request):
     name = request.data.get("name")
     email = request.data.get("email")
@@ -59,6 +73,7 @@ def signup(request):
 
 
 @api_view(["POST"])
+@authentication_classes([CsrfSessionAuthentication])
 def login_view(request):
     email = request.data.get("email")
     password = request.data.get("password")
@@ -104,6 +119,7 @@ def login_view(request):
 
 
 @api_view(["POST"])
+@authentication_classes([CsrfSessionAuthentication])
 def logout_view(request):
     logout(request)
 

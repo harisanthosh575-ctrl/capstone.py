@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../api";
 
 function CreateJob() {
   const [formData, setFormData] = useState({
@@ -28,8 +28,8 @@ function CreateJob() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/jobs/create/",
+      const response = await api.post(
+        "/api/jobs/create/",
         {
           title: formData.title.trim(),
           description: formData.description.trim(),

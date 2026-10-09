@@ -17,22 +17,11 @@ from app.models import (
 
 
 # ============================================================
-# SESSION AUTHENTICATION WITHOUT CSRF
-# For current API testing with PowerShell
-# ============================================================
-
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-
-    def enforce_csrf(self, request):
-        return
-
-
-# ============================================================
 # APPLY FOR A JOB
 # ============================================================
 
 @api_view(["POST"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def apply_for_job(request, job_id):
 
@@ -201,7 +190,7 @@ def list_job_applications(request, job_id):
 # ============================================================
 
 @api_view(["POST"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def accept_application(request, application_id):
 
@@ -269,7 +258,7 @@ def accept_application(request, application_id):
 # ============================================================
 
 @api_view(["POST"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def reject_application(request, application_id):
 

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .auth import signup, login_view, logout_view
+from .auth import csrf_token, signup, login_view, logout_view
 from .job import create_job, list_jobs
 from .job_application import (
     apply_for_job,
@@ -16,6 +16,7 @@ from .portfolio import (
 
 urlpatterns = [
     # Authentication
+    path("csrf/", csrf_token, name="api-csrf-token"),
     path("signup/", signup, name="api-signup"),
     path("login/", login_view, name="api-login"),
     path("logout/", logout_view, name="api-logout"),
