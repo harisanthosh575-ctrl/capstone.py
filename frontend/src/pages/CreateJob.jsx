@@ -41,8 +41,6 @@ function CreateJob() {
         }
       );
 
-      console.log("Create Job Response:", response.data);
-
       if (response.data?.success) {
         setMessage("Job created successfully!");
 
@@ -58,12 +56,7 @@ function CreateJob() {
         );
       }
     } catch (error) {
-      console.error("Create Job Error:", error);
-
       if (error.response) {
-        console.log("Status:", error.response.status);
-        console.log("Server Response:", error.response.data);
-
         setMessage(
           error.response.data?.message ||
             "Unable to create job."

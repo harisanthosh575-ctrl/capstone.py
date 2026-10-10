@@ -32,8 +32,6 @@ try {
     formData
   );
 
-  console.log("Signup response:", response.data);
-
   setMessage(
     response.data?.message ||
       "Account created successfully!"
@@ -47,8 +45,6 @@ try {
     phone: "",
   });
 } catch (error) {
-  console.error("Signup error:", error);
-
   if (error.response) {
     setMessage(
       error.response.data?.message ||

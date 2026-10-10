@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api";
+import api, { logout } from "../api";
 
 function JobDetails() {
   const { jobId } = useParams();
@@ -15,44 +15,47 @@ function JobDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchJob();
-  }, [jobId]);
+    let cancelled = false;
+    const fetchJob = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  const fetchJob = async () => {
-    try {
-      setLoading(true);
-      setError("");
+        const response = await api.get("/api/jobs/");
+        const jobs = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        const selectedJob = jobs.find(
+          (item) => String(item.id) === String(jobId)
+        );
 
-      const response = await api.get("/api/jobs/", {
-        withCredentials: true,
-      });
-
-      const jobs = Array.isArray(response.data)
-        ? response.data
-        : response.data?.data || [];
-
-      const selectedJob = jobs.find(
-        (item) => String(item.id) === String(jobId)
-      );
-
-      if (!selectedJob) {
-        setError("Job not found.");
-        return;
+        if (!cancelled) {
+          if (!selectedJob) {
+            setError("Job not found.");
+          } else {
+            setJob(selectedJob);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err.response?.data?.message ||
+              err.response?.data?.detail ||
+              "Unable to load job details."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
+    };
 
-      setJob(selectedJob);
-    } catch (err) {
-      console.error("Job details error:", err);
-
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.detail ||
-          "Unable to load job details."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchJob();
+    return () => {
+      cancelled = true;
+    };
+  }, [jobId]);
 
   const handleApply = async (e) => {
     e.preventDefault();
@@ -74,8 +77,8 @@ function JobDetails() {
       if (storedData) {
         storedUser = JSON.parse(storedData);
       }
-    } catch (parseError) {
-      console.error("User data error:", parseError);
+    } catch {
+      storedUser = null;
     }
 
     const user = storedUser?.data || storedUser;
@@ -106,8 +109,6 @@ function JobDetails() {
         }
       );
 
-      console.log("Application response:", response.data);
-
       if (response.data?.success) {
         setMessage(
           response.data.message ||
@@ -123,11 +124,6 @@ function JobDetails() {
         );
       }
     } catch (err) {
-      console.error("Application error:", err);
-
-      console.log("Status:", err.response?.status);
-      console.log("Response:", err.response?.data);
-
       if (err.response?.status === 401) {
         setError("Your login session has expired. Please login again.");
       } else if (err.response?.status === 403) {
@@ -148,9 +144,13 @@ function JobDetails() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("creatorMarketUser");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = "/login";
+    } catch {
+      setError("Unable to log out. Please try again.");
+    }
   };
 
   const getJobIcon = (title = "") => {

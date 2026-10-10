@@ -1,49 +1,54 @@
 import { useEffect, useState } from "react";
-import api from "../api";
+import api, { logout } from "../api";
 
 function Jobs() {
 const [jobs, setJobs] = useState([]);
 const [loading, setLoading] = useState(true);
 const [message, setMessage] = useState("");
+const [loggingOut, setLoggingOut] = useState(false);
 
 useEffect(() => {
+const fetchJobs = async () => {
+  try {
+    const response = await api.get("/api/jobs/");
+
+    if (Array.isArray(response.data)) {
+      setJobs(response.data);
+    } else if (Array.isArray(response.data?.data)) {
+      setJobs(response.data.data);
+    } else {
+      setJobs([]);
+    }
+  } catch (error) {
+    if (error.response) {
+      setMessage(
+        error.response.data?.message ||
+          "Unable to load jobs."
+      );
+    } else {
+      setMessage(
+        "Unable to connect to the Django server."
+      );
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 fetchJobs();
 }, []);
 
-const fetchJobs = async () => {
-try {
-const response = await api.get(
-"/api/jobs/"
-);
+const handleLogout = async () => {
+  setLoggingOut(true);
+  setMessage("");
 
-
-  console.log("Jobs response:", response.data);
-
-  if (Array.isArray(response.data)) {
-    setJobs(response.data);
-  } else if (Array.isArray(response.data?.data)) {
-    setJobs(response.data.data);
-  } else {
-    setJobs([]);
+  try {
+    await logout();
+    window.location.href = "/login";
+  } catch {
+    setMessage("Unable to log out. Please try again.");
+    setLoggingOut(false);
   }
-} catch (error) {
-  console.error("Jobs error:", error);
-
-  if (error.response) {
-    setMessage(
-      error.response.data?.message ||
-        "Unable to load jobs."
-    );
-  } else {
-    setMessage(
-      "Unable to connect to the Django server."
-    );
-  }
-} finally {
-  setLoading(false);
-}
-
-
 };
 
 const getJobIcon = (title = "") => {
@@ -103,15 +108,10 @@ return ( <div className="bg-light min-vh-100">
 
         <button
           className="btn btn-outline-light d-none d-md-block"
-          onClick={() => {
-            localStorage.removeItem(
-              "creatorMarketUser"
-            );
-
-            window.location.href = "/login";
-          }}
+          onClick={handleLogout}
+          disabled={loggingOut}
         >
-          Logout
+          {loggingOut ? "Logging out..." : "Logout"}
         </button>
 
       </div>

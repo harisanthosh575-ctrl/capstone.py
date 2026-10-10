@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import api from "../api";
+import api, { getCsrfToken } from "../api";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -25,18 +25,17 @@ function Login() {
     setLoading(true);
 
     try {
+      const csrfToken = await getCsrfToken();
       const response = await api.post(
         "/api/login/",
         formData,
         {
-          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
           },
         }
       );
-
-      console.log("Login response:", response.data);
 
       // Store user information for React
       localStorage.setItem(
@@ -50,9 +49,6 @@ function Login() {
         window.location.href = "/dashboard";
       }, 500);
     } catch (error) {
-      console.error("Login error:", error);
-      console.error("Login response:", error.response?.data);
-
       if (error.response) {
         setMessage(
           error.response.data?.message ||

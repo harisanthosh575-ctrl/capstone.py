@@ -14,7 +14,9 @@ class CsrfApiTests(TestCase):
         response = self.client.get("/api/csrf/")
         self.assertEqual(response.status_code, 200)
         self.assertIn("csrftoken", response.cookies)
-        return response.json()["csrfToken"]
+        token = response.json()["csrfToken"]
+        self.assertTrue(token)
+        return token
 
     def post_json(self, path, data, csrf_token=None):
         headers = {}
@@ -65,7 +67,7 @@ class CsrfApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_login_requires_csrf_token(self):
-        self.create_user("creator@example.com", "creator")
+        user = self.create_user("creator@example.com", "creator")
         payload = {
             "email": "creator@example.com",
             "password": "test-password-123",
@@ -78,6 +80,10 @@ class CsrfApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("sessionid", response.cookies)
+        self.assertEqual(
+            self.client.session["_auth_user_id"],
+            str(user.pk),
+        )
 
     def test_job_creation_requires_csrf_token_for_session_user(self):
         creator = self.create_user("creator@example.com", "creator")

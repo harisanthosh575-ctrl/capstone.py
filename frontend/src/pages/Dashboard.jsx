@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { logout } from "../api";
 
 function Dashboard() {
-const [user, setUser] = useState(null);
+const [user, setUser] = useState(() => {
+  const storedUser = localStorage.getItem("creatorMarketUser");
+  if (!storedUser) {
+    return null;
+  }
 
-useEffect(() => {
-const storedUser = localStorage.getItem("creatorMarketUser");
-
-if (storedUser) {
   try {
     const parsed = JSON.parse(storedUser);
-    setUser(parsed.data || parsed);
-  } catch (error) {
-    console.error("Unable to read user data:", error);
+    return parsed.data || parsed;
+  } catch {
+    return null;
   }
-}
-
-}, []);
+});
+const [logoutError, setLogoutError] = useState("");
+const [loggingOut, setLoggingOut] = useState(false);
 
 if (!user) {
 return ( <div className="bg-light min-vh-100"> <nav className="navbar navbar-dark sticky-top"> <div className="container py-3"> <a href="/" className="navbar-brand">
@@ -52,9 +53,18 @@ Creator<span className="gradient-text">Market</span> </a> </div> </nav>
 const isCreator = user.role === "creator";
 const isFreelancer = user.role === "freelancer";
 
-const handleLogout = () => {
-localStorage.removeItem("creatorMarketUser");
-window.location.href = "/login";
+const handleLogout = async () => {
+setLoggingOut(true);
+setLogoutError("");
+
+try {
+  await logout();
+  setUser(null);
+  window.location.href = "/login";
+} catch {
+  setLogoutError("Unable to log out. Please try again.");
+  setLoggingOut(false);
+}
 };
 
 return ( <div className="bg-light min-vh-100">
@@ -78,13 +88,22 @@ return ( <div className="bg-light min-vh-100">
         <button
           className="btn btn-outline-light"
           onClick={handleLogout}
+          disabled={loggingOut}
         >
-          Logout
+          {loggingOut ? "Logging out..." : "Logout"}
         </button>
       </div>
 
     </div>
   </nav>
+
+  {logoutError && (
+    <div className="container pt-3">
+      <div className="alert alert-danger" role="alert">
+        {logoutError}
+      </div>
+    </div>
+  )}
 
   {/* DASHBOARD */}
   <main className="dashboard-page">

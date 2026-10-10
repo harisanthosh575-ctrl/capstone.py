@@ -7,6 +7,7 @@ from pathlib import Path
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,7 +17,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 if not SECRET_KEY:
     if not DEBUG:
         raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is disabled.")
-    SECRET_KEY = "django-insecure-uiwc%pwn6!$)fp=%!%6l695s*)e0r4z3tqafuwp!ov6w1i$9-@"
+    SECRET_KEY = get_random_secret_key()
 
 default_hosts = ["127.0.0.1", "localhost"] if DEBUG else []
 ALLOWED_HOSTS = [
@@ -84,6 +85,11 @@ if database_url:
             ssl_require=not DEBUG,
         )
     }
+elif not DEBUG:
+    raise ImproperlyConfigured(
+        "DATABASE_URL must be set when DEBUG is disabled; "
+        "SQLite is only supported for local development."
+    )
 else:
     DATABASES = {
         "default": {
@@ -166,8 +172,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "None" if not DEBUG else "Lax"
+CSRF_COOKIE_SAMESITE = "None" if not DEBUG else "Lax"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = not DEBUG
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
